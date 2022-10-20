@@ -5,16 +5,16 @@ import (
 	"io/ioutil"
 
 	"github.com/bells307/gitlab-hooker/internal/model"
-	"github.com/bells307/gitlab-hooker/internal/usecase"
+	"github.com/bells307/gitlab-hooker/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type hookHandler struct {
-	mergeRequestUsecase usecase.MergeRequestUsecase
+	mergeRequestService service.MergeRequestService
 }
 
-func NewHookHandler(mergeRequestUsecase usecase.MergeRequestUsecase) *hookHandler {
-	return &hookHandler{mergeRequestUsecase}
+func NewHookHandler(mergeRequestService service.MergeRequestService) *hookHandler {
+	return &hookHandler{mergeRequestService}
 }
 
 func (h *hookHandler) Register(router *gin.Engine) {
@@ -33,5 +33,5 @@ func (h *hookHandler) processHook(c *gin.Context) {
 		panic(err)
 	}
 
-	h.mergeRequestUsecase.ProcessMergeRequest(&mr)
+	h.mergeRequestService.ProcessMergeRequest(&mr)
 }
