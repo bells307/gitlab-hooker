@@ -15,22 +15,54 @@ func NewUpdateHandler(updateService interfaces.UpdateService) *updateHandler {
 }
 
 func (h *updateHandler) Register(api *tgbotapi.BotAPI, mux *tm.Mux) {
-	mux.AddHandler(tm.NewHandler(
-		func(u *tm.Update) bool {
-			if msg := u.EffectiveMessage(); msg != nil {
-				if members := msg.NewChatMembers; members != nil {
-					for _, m := range members {
-						if m.ID == api.Self.ID {
-							return true
+	mux.
+		// AddHandler(tm.NewHandler(
+		// 	func (u *tm.Update) bool {
+		// 		if message := u.EffectiveMessage(); message != nil {
+		// 			if message.NewChatMembers != nil && len(message.NewChatMembers) > 0 {
+
+		// 			}
+		// 		}
+		// 		return false
+		// 	},
+		// 	h.updateService.AddedToChat,
+		// ))
+		AddHandler(tm.NewHandler(
+			func(u *tm.Update) bool {
+				if mcm := u.MyChatMember; mcm != nil {
+					ncm := mcm.NewChatMember
+					if ncm.User != nil {
+						if ncm.User.ID == api.Self.ID {
+							if (ncm.Status != "left") && (ncm.Status != "kicked") {
+								return true
+							}
 						}
 					}
 				}
-			}
 
-			return false
-		},
-		func(u *tm.Update) {
-			h.updateService.AddedToChat(&u.Update)
-		},
-	))
+				return false
+			},
+			func(u *tm.Update) {
+				h.updateService.AddedToChat(u)
+			},
+		)).
+		AddHandler(tm.NewHandler(
+			func(u *tm.Update) bool {
+				if mcm := u.MyChatMember; mcm != nil {
+					ncm := mcm.NewChatMember
+					if ncm.User != nil {
+						if ncm.User.ID == api.Self.ID {
+							if (ncm.Status == "left") || (ncm.Status == "kicked") {
+								return true
+							}
+						}
+					}
+				}
+
+				return false
+			},
+			func(u *tm.Update) {
+				h.updateService.RemovedFromChat(u)
+			},
+		))
 }
