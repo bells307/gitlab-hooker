@@ -19,6 +19,8 @@ type Config struct {
 }
 
 func loadConfig(path string) (config Config, err error) {
+	viper.SetDefault("listen", "0.0.0.0:8888")
+
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
@@ -34,9 +36,7 @@ func loadConfig(path string) (config Config, err error) {
 }
 
 func main() {
-	viper.SetDefault("listen", "0.0.0.0:8888")
-
-	log.Println("loading configuration ...")
+	log.Printf("loading configuration ...")
 	config, err := loadConfig(".")
 	if err != nil {
 		log.Fatal("can't load configuration:", err)

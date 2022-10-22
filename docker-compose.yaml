@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  bot:
+    build:
+      context: .
+    volumes:
+      - ./config.yml:/opt/gitlab-hooker/config.yml
+    ports: 
+      - "8888:8888"
