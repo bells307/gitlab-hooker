@@ -29,18 +29,18 @@ func main() {
 		api.Debug = true
 	}
 
-	telegramService := service.NewTelegramService(api)
+	telegramService := service.NewTelegramService(api, []int64{-1001874758944})
 	updateHandler := tg.NewUpdateHandler(telegramService)
 	mux := tm.NewMux()
 	updateHandler.Register(api, mux)
 
-	mergeRequestService := service.NewMergeRequestService(telegramService)
+	hookService := service.NewHookService(telegramService)
 
 	router := gin.Default()
-	hookHandler := http.NewHookHandler(mergeRequestService)
+	hookHandler := http.NewHookHandler(hookService)
 	hookHandler.Register(router)
 
-	go runTelegramBot(api, mux)
+	runTelegramBot(api, mux)
 	router.Run("0.0.0.0:8888")
 }
 
@@ -49,10 +49,9 @@ func runTelegramBot(api *tgbotapi.BotAPI, mux *tm.Mux) {
 	updConfig.Timeout = 60
 	updChan := api.GetUpdatesChan(updConfig)
 
-	for upd := range updChan {
-		// log.Printf("new upd: %v", upd)
-		// msg := tgbotapi.NewMessage(-1001874758944, "i got update")
-		// api.Send(msg)
-		mux.Dispatch(api, upd)
-	}
+	go func() {
+		for upd := range updChan {
+			mux.Dispatch(api, upd)
+		}
+	}()
 }

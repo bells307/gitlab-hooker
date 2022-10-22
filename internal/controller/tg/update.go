@@ -2,15 +2,15 @@ package tg
 
 import (
 	tm "github.com/and3rson/telemux/v2"
-	"github.com/bells307/gitlab-hooker/internal/service"
+	"github.com/bells307/gitlab-hooker/internal/interfaces"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type updateHandler struct {
-	updateService service.TelegramService
+	updateService interfaces.UpdateService
 }
 
-func NewUpdateHandler(updateService service.TelegramService) *updateHandler {
+func NewUpdateHandler(updateService interfaces.UpdateService) *updateHandler {
 	return &updateHandler{updateService}
 }
 
@@ -31,12 +31,6 @@ func (h *updateHandler) Register(api *tgbotapi.BotAPI, mux *tm.Mux) {
 		},
 		func(u *tm.Update) {
 			h.updateService.AddedToChat(&u.Update)
-		},
-	)).AddHandler(tm.NewCommandHandler(
-		"help",
-		nil,
-		func(u *tm.Update) {
-			api.Send(tgbotapi.NewMessage(u.Message.Chat.ID, "help"))
 		},
 	))
 }

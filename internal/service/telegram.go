@@ -6,17 +6,14 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-type TelegramService interface {
-	AddedToChat(*tgbotapi.Update)
-	RemovedFromChat(*tgbotapi.Update)
-}
-
+// Сервис для работы с телеграм-ботом
 type telegramService struct {
-	api *tgbotapi.BotAPI
+	api   *tgbotapi.BotAPI
+	chats []int64
 }
 
-func NewTelegramService(api *tgbotapi.BotAPI) *telegramService {
-	return &telegramService{api}
+func NewTelegramService(api *tgbotapi.BotAPI, chats []int64) *telegramService {
+	return &telegramService{api, chats}
 }
 
 func (t *telegramService) AddedToChat(*tgbotapi.Update) {
@@ -25,4 +22,19 @@ func (t *telegramService) AddedToChat(*tgbotapi.Update) {
 
 func (t *telegramService) RemovedFromChat(*tgbotapi.Update) {
 	log.Print("i was removed")
+}
+
+func (t *telegramService) SendMessageToChats(msg string) {
+	for _, c := range t.chats {
+		msgConfig := tgbotapi.MessageConfig{
+			BaseChat: tgbotapi.BaseChat{
+				ChatID:           c,
+				ReplyToMessageID: 0,
+			},
+			Text:                  msg,
+			DisableWebPagePreview: false,
+			ParseMode:             "HTML",
+		}
+		t.api.Send(msgConfig)
+	}
 }
