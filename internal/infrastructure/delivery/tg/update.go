@@ -2,31 +2,25 @@ package tg
 
 import (
 	tm "github.com/and3rson/telemux/v2"
-	"github.com/bells307/gitlab-hooker/internal/interfaces"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type updateHandler struct {
-	updateService interfaces.UpdateService
+	updateService UpdateService
 }
 
-func NewUpdateHandler(updateService interfaces.UpdateService) *updateHandler {
+// Сервис обработки Update'ов телеграма
+type UpdateService interface {
+	AddedToChat(*tm.Update)
+	RemovedFromChat(*tm.Update)
+}
+
+func NewUpdateHandler(updateService UpdateService) *updateHandler {
 	return &updateHandler{updateService}
 }
 
 func (h *updateHandler) Register(api *tgbotapi.BotAPI, mux *tm.Mux) {
 	mux.
-		// AddHandler(tm.NewHandler(
-		// 	func (u *tm.Update) bool {
-		// 		if message := u.EffectiveMessage(); message != nil {
-		// 			if message.NewChatMembers != nil && len(message.NewChatMembers) > 0 {
-
-		// 			}
-		// 		}
-		// 		return false
-		// 	},
-		// 	h.updateService.AddedToChat,
-		// ))
 		AddHandler(tm.NewHandler(
 			func(u *tm.Update) bool {
 				if mcm := u.MyChatMember; mcm != nil {
