@@ -4,19 +4,16 @@ import (
 	"fmt"
 	"github.com/bells307/gitlab-hooker/internal/domain/merge_request"
 	"github.com/bells307/gitlab-hooker/internal/domain/pipeline"
+	"github.com/bells307/gitlab-hooker/internal/infrastructure/sender"
 )
 
+// Сервис обработки хуков гитлаба
 type hookService struct {
-	senderService SenderService
+	sender sender.Sender
 }
 
-// Сервис отправки сообщений
-type SenderService interface {
-	SendMessageToChats(string)
-}
-
-func NewHookService(senderService SenderService) *hookService {
-	return &hookService{senderService}
+func NewHookService(sender sender.Sender) *hookService {
+	return &hookService{sender}
 }
 
 func (s *hookService) ProcessMergeRequestHook(hook merge_request.MergeRequest) error {
@@ -29,7 +26,10 @@ func (s *hookService) ProcessMergeRequestHook(hook merge_request.MergeRequest) e
 			hook.Project,
 			hook.URL,
 		)
-		s.senderService.SendMessageToChats(msg)
+
+		if err := s.sender.SendMessageToChats(msg); err != nil {
+			return err
+		}
 	} else if hook.State == merge_request.StateMerged && hook.Action == merge_request.ActionMerge {
 		msg := fmt.Sprintf(
 			"✅ <b>%s</b> слил изменения по <b>Merge Request</b> \"%s\" на проекте <i>%s</i>:\n%s",
@@ -38,7 +38,10 @@ func (s *hookService) ProcessMergeRequestHook(hook merge_request.MergeRequest) e
 			hook.Project,
 			hook.URL,
 		)
-		s.senderService.SendMessageToChats(msg)
+
+		if err := s.sender.SendMessageToChats(msg); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -51,14 +54,20 @@ func (s *hookService) ProcessPipelineHook(hook pipeline.Pipeline) error {
 			hook.Project,
 			hook.Branch,
 		)
-		s.senderService.SendMessageToChats(msg)
+
+		if err := s.sender.SendMessageToChats(msg); err != nil {
+			return err
+		}
 	} else if hook.Status == pipeline.Failed {
 		msg := fmt.Sprintf(
 			"🧨 <b>Pipeline</b> завершился с ошибкой на проекте <i>%s</i> (ветка <i>%s</i>)",
 			hook.Project,
 			hook.Branch,
 		)
-		s.senderService.SendMessageToChats(msg)
+
+		if err := s.sender.SendMessageToChats(msg); err != nil {
+			return err
+		}
 	}
 
 	return nil

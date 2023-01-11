@@ -1,4 +1,4 @@
-package application
+package sender
 
 import (
 	"log"
@@ -9,26 +9,26 @@ import (
 )
 
 // Сервис для работы с телеграм-ботом
-type telegramService struct {
+type telegramBot struct {
 	api   *tgbotapi.BotAPI
 	chats []int64
 }
 
-func NewTelegramService(api *tgbotapi.BotAPI, chats []int64) *telegramService {
-	return &telegramService{api, chats}
+func NewTelegramBot(api *tgbotapi.BotAPI, chats []int64) *telegramBot {
+	return &telegramBot{api, chats}
 }
 
-func (t *telegramService) AddedToChat(u *tm.Update) {
-	chat_id := u.Update.MyChatMember.Chat.ID
+func (t *telegramBot) AddedToChat(u *tm.Update) {
+	chatID := u.Update.MyChatMember.Chat.ID
 	title := u.Update.MyChatMember.Chat.Title
-	log.Printf("bot added to chat \"%s\", chat id: %d", title, chat_id)
-	t.chats = append(t.chats, chat_id)
+	log.Printf("bot added to chat \"%s\", chat id: %d", title, chatID)
+	t.chats = append(t.chats, chatID)
 	// Обновляем конфигурацию
 	viper.Set("Telegram.Chats", t.chats)
 	viper.WriteConfig()
 }
 
-func (t *telegramService) RemovedFromChat(u *tm.Update) {
+func (t *telegramBot) RemovedFromChat(u *tm.Update) {
 	chatID := u.Update.MyChatMember.Chat.ID
 	title := u.Update.MyChatMember.Chat.Title
 	log.Printf("bot removed from chat \"%s\", chat id: %d", title, chatID)
@@ -49,7 +49,7 @@ func (t *telegramService) RemovedFromChat(u *tm.Update) {
 	}
 }
 
-func (t *telegramService) SendMessageToChats(msg string) {
+func (t *telegramBot) SendMessageToChats(msg string) error {
 	for _, c := range t.chats {
 		msgConfig := tgbotapi.MessageConfig{
 			BaseChat: tgbotapi.BaseChat{
@@ -60,6 +60,10 @@ func (t *telegramService) SendMessageToChats(msg string) {
 			DisableWebPagePreview: false,
 			ParseMode:             "HTML",
 		}
-		t.api.Send(msgConfig)
+		if _, err := t.api.Send(msgConfig); err != nil {
+			return err
+		}
+
 	}
+	return nil
 }

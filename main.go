@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/bells307/gitlab-hooker/internal/adapters/sender"
 	"log"
 
 	tm "github.com/and3rson/telemux/v2"
@@ -51,12 +52,12 @@ func main() {
 		api.Debug = true
 	}
 
-	telegramService := application.NewTelegramService(api, config.TelegramBotConfig.Chats)
-	updateHandler := tg.NewUpdateHandler(telegramService)
+	telegramBot := sender.NewTelegramBot(api, config.TelegramBotConfig.Chats)
+	updateHandler := tg.NewUpdateHandler(telegramBot)
 	mux := tm.NewMux()
 	updateHandler.Register(api, mux)
 
-	hookService := application.NewHookService(telegramService)
+	hookService := application.NewHookService(telegramBot)
 
 	router := gin.Default()
 	hookHandler := http.NewHookHandler(hookService)

@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /usr/local/bin/gitlab-hooker ./cmd
+RUN go build -v -o /usr/local/bin/gitlab-hooker .
 WORKDIR /opt/gitlab-hooker
 
 CMD ["gitlab-hooker"]
