@@ -2,8 +2,9 @@ package http
 
 import (
 	"errors"
+	"github.com/bells307/gitlab-hooker/internal/domain/merge_request"
+	"github.com/bells307/gitlab-hooker/internal/domain/pipeline"
 
-	"github.com/bells307/gitlab-hooker/internal/domain"
 	"github.com/bells307/gitlab-hooker/pkg/gin/err_resp"
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ const GitlabEventHeaderName string = "X-Gitlab-Event"
 // Строковые значения, передаваемые в хедере
 const (
 	MergeRequestEventHeader string = "Merge Request Hook"
+	PipelineEventHeader     string = "PipelineHook Hook"
 )
 
 type hookHandler struct {
@@ -21,7 +23,8 @@ type hookHandler struct {
 
 // Сервис обработки хуков от гитлаба
 type HookService interface {
-	ProcessMergeRequestHook(domain.MergeRequestHook) error
+	ProcessMergeRequestHook(merge_request.MergeRequest) error
+	ProcessPipelineHook(pipeline.Pipeline) error
 }
 
 func NewHookHandler(hookService HookService) *hookHandler {
@@ -41,12 +44,22 @@ func (h *hookHandler) processHook(c *gin.Context) {
 
 	switch header[0] {
 	case MergeRequestEventHeader:
-		var hook domain.MergeRequestHook
-		if err := c.Bind(&hook); err != nil {
+		var input MergeRequestHookInput
+		if err := c.Bind(&input); err != nil {
 			return
 		}
 
-		if err := h.hookService.ProcessMergeRequestHook(hook); err != nil {
+		if err := h.hookService.ProcessMergeRequestHook(input.ToDomain()); err != nil {
+			err_resp.NewErrorResponse(c, err)
+			return
+		}
+	case PipelineEventHeader:
+		var input PipelineHookInput
+		if err := c.Bind(&input); err != nil {
+			return
+		}
+
+		if err := h.hookService.ProcessPipelineHook(input.ToDomain()); err != nil {
 			err_resp.NewErrorResponse(c, err)
 			return
 		}

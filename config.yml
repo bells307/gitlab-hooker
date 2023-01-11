@@ -1,5 +1,6 @@
 listen: 0.0.0.0:8888
 telegram:
-    chats: []
+    chats:
+        - -638432033
     debug: true
-    token: YOUR_TOKEN_HERE
+    token: 2049961870:AAGO5zAwd4aMUdCirLwjn0-05Bjn252bXoU

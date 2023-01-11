@@ -29,13 +29,13 @@ func (t *telegramService) AddedToChat(u *tm.Update) {
 }
 
 func (t *telegramService) RemovedFromChat(u *tm.Update) {
-	chat_id := u.Update.MyChatMember.Chat.ID
+	chatID := u.Update.MyChatMember.Chat.ID
 	title := u.Update.MyChatMember.Chat.Title
-	log.Printf("bot removed from chat \"%s\", chat id: %d", title, chat_id)
+	log.Printf("bot removed from chat \"%s\", chat id: %d", title, chatID)
 
 	idx := -1
 	for i, c := range t.chats {
-		if c == chat_id {
+		if c == chatID {
 			idx = i
 			break
 		}
