@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+
 	"github.com/bells307/gitlab-hooker/internal/domain/merge_request"
 	"github.com/bells307/gitlab-hooker/internal/domain/pipeline"
 )

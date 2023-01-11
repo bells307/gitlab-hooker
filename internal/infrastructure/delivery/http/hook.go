@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+
 	"github.com/bells307/gitlab-hooker/internal/domain/merge_request"
 	"github.com/bells307/gitlab-hooker/internal/domain/pipeline"
 
@@ -14,7 +15,7 @@ const GitlabEventHeaderName string = "X-Gitlab-Event"
 // Строковые значения, передаваемые в хедере
 const (
 	MergeRequestEventHeader string = "Merge Request Hook"
-	PipelineEventHeader     string = "PipelineHook Hook"
+	PipelineEventHeader     string = "Pipeline Hook"
 )
 
 type hookHandler struct {
